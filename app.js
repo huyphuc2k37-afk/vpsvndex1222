@@ -441,18 +441,16 @@
     submit.textContent = 'Đang gửi…';
 
     try {
-      // Lấy email từ user đang đăng nhập — không cần user nhập tay
       const customerEmail = state.user.email || '';
 
       const payload = {
-        user_id: state.user.id,
+        user_id: state.user.id,                 // optional — đã thêm bằng migration
+        user_email: customerEmail,              // bắt buộc theo schema gốc
         package_id: plan.id,
+        package_name: plan.name,
         region: state.activeRegion,
+        cycle: '1m',                            // mặc định 1 tháng
         amount_vnd: plan.price,
-        customer_name: null,           // không yêu cầu
-        customer_phone: null,          // không yêu cầu
-        customer_email: customerEmail, // lấy từ auth
-        notes: null,                   // không yêu cầu
         status: 'pending',
       };
       const { error } = await supabase.from('orders').insert(payload);
