@@ -202,6 +202,9 @@
 
     const transferNote = `VPSVNDEX ${plan.id.toUpperCase()} ${state.activeRegion.toUpperCase()}`;
     $('#transfer-note').textContent = transferNote;
+    // Auto-fill email từ user đang đăng nhập
+    const recipient = $('#order-recipient-email');
+    if (recipient) recipient.textContent = state.user?.email || '—';
     $('#copy-note').dataset.copy = transferNote;
 
     // Reset form mỗi lần mở
@@ -423,16 +426,6 @@
   /* ===========================================================
    * 6. ORDERS — tạo + lịch sử
    * =========================================================== */
-  function validateOrderForm() {
-    const name = $('#order-name').value.trim();
-    const phone = $('#order-phone').value.trim();
-    const email = $('#order-email').value.trim();
-    if (name.length < 2) return 'Vui lòng nhập họ tên.';
-    if (!/^[0-9+\-\s]{8,15}$/.test(phone)) return 'Số điện thoại chưa hợp lệ.';
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return 'Email chưa hợp lệ.';
-    return null;
-  }
-
   async function handleOrderSubmit(e) {
     e.preventDefault();
     if (!state.user) { showToast('Phiên đăng nhập đã hết, vui lòng đăng nhập lại.'); return; }
@@ -441,33 +434,32 @@
     const plan = PACKAGES.find((p) => p.id === state.pendingOrderPackageId);
     if (!plan) return;
 
-    const validationError = validateOrderForm();
-    if (validationError) { showToast(validationError); return; }
-
     const submit = $('#order-submit');
     submit.disabled = true;
     const originalText = submit.textContent;
     submit.textContent = 'Đang gửi…';
 
     try {
+      // Lấy email từ user đang đăng nhập — không cần user nhập tay
+      const customerEmail = state.user.email || '';
+
       const payload = {
         user_id: state.user.id,
         package_id: plan.id,
         region: state.activeRegion,
         amount_vnd: plan.price,
-        customer_name: $('#order-name').value.trim(),
-        customer_phone: $('#order-phone').value.trim(),
-        customer_email: $('#order-email').value.trim(),
-        notes: $('#order-notes').value.trim() || null,
+        customer_name: null,           // không yêu cầu
+        customer_phone: null,          // không yêu cầu
+        customer_email: customerEmail, // lấy từ auth
+        notes: null,                   // không yêu cầu
         status: 'pending',
       };
       const { error } = await supabase.from('orders').insert(payload);
       if (error) throw error;
 
-      showToast('Đã ghi nhận đơn hàng. Admin sẽ liên hệ bạn sớm nhất.');
+      showToast('Đã ghi nhận đơn. Admin sẽ xác nhận và gửi thông tin VPS qua email trong 1–24h.');
       await loadMyOrders();
-      // Reset form, KHÔNG đóng modal để user xem lại QR
-      $('#order-form').reset();
+      // KHÔNG reset form (không còn field), KHÔNG đóng modal để user xem lại QR
     } catch (err) {
       console.error('[createOrder]', err);
       showToast('Không thể tạo đơn: ' + (err?.message || 'lỗi không xác định'));

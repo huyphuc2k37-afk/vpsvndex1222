@@ -9,6 +9,8 @@
     />
     <meta name="theme-color" content="#071b33" />
     <title>VPSVNDEX — VPS Việt Nam & US</title>
+    <link rel="icon" type="image/png" href="iconweb.png" />
+    <link rel="apple-touch-icon" href="iconweb.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -297,7 +299,7 @@
         <div class="section-intro">
           <p class="eyebrow"><span></span> ĐƠN HÀNG CỦA BẠN</p>
           <h2>Lịch sử đơn hàng.</h2>
-          <p>Trạng thái các đơn bạn đã đăng ký. Admin sẽ liên hệ qua email/SĐT trong đơn.</p>
+          <p>Trạng thái các đơn bạn đã đăng ký. Khi admin xác nhận, thông tin VPS (IP, mật khẩu) sẽ hiển thị tại đây.</p>
         </div>
         <div id="my-orders-list" class="orders-list"></div>
       </section>
@@ -360,27 +362,16 @@
           </div>
           <div class="checkout-flow">
             <form class="order-form" id="order-form" novalidate>
-              <p class="order-form-heading">Thông tin nhận VPS</p>
-              <label>
-                <span>Họ và tên *</span>
-                <input id="order-name" name="name" type="text" autocomplete="name" placeholder="Nguyễn Văn A" required />
-              </label>
-              <label>
-                <span>Số điện thoại *</span>
-                <input id="order-phone" name="phone" type="tel" autocomplete="tel" placeholder="09xx xxx xxx" required />
-              </label>
-              <label>
-                <span>Email nhận thông tin VPS *</span>
-                <input id="order-email" name="email" type="email" autocomplete="email" placeholder="email@cuaban.com" required />
-              </label>
-              <label>
-                <span>Ghi chú (tuỳ chọn)</span>
-                <textarea id="order-notes" name="notes" rows="2" placeholder="Yêu cầu thêm về OS, datacenter,..."></textarea>
-              </label>
+              <p class="order-form-heading">Xác nhận đơn hàng</p>
+              <div class="order-recipient" id="order-recipient">
+                <span>Tài khoản đặt mua</span>
+                <strong id="order-recipient-email">—</strong>
+                <p>Thông tin VPS sẽ được gửi về email này sau khi admin xác nhận thanh toán.</p>
+              </div>
               <button id="order-submit" class="order-submit" type="submit">
-                Tôi đã chuyển khoản — Ghi nhận đơn <span>→</span>
+                Đã chuyển khoản — Ghi nhận đơn <span>→</span>
               </button>
-              <p class="order-form-tip">Sau khi chuyển khoản, bấm nút trên để ghi nhận đơn. Admin sẽ xác nhận và gửi thông tin VPS qua email trong vòng 1–24 giờ.</p>
+              <p class="order-form-tip">Sau khi chuyển khoản thành công, bấm nút trên để ghi nhận đơn. Admin sẽ xác nhận thủ công và gửi thông tin VPS (IP, mật khẩu) qua email trong vòng 1–24 giờ.</p>
             </form>
 
             <div class="payment-card">

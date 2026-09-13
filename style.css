@@ -1499,8 +1499,38 @@ footer .brand-mark { transform: skew(-18deg) scale(.8); transform-origin: left; 
   letter-spacing: 0.18em;
   text-transform: uppercase;
   color: var(--ink);
-  margin: 0 0 4px;
-  font-weight: 600;
+  margin: 0 0 14px;
+  font-weight: 700;
+}
+.order-recipient {
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--blue);
+  border-radius: var(--radius-sm);
+  padding: 14px 16px;
+  margin-bottom: 14px;
+}
+.order-recipient span {
+  display: block;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+.order-recipient strong {
+  display: block;
+  font-size: 15px;
+  color: var(--ink);
+  font-weight: 700;
+  word-break: break-all;
+}
+.order-recipient p {
+  margin: 6px 0 0;
+  font-size: 12.5px;
+  color: var(--text-soft);
+  line-height: 1.5;
 }
 .order-form label {
   display: flex;
