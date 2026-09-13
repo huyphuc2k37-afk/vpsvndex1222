@@ -151,6 +151,15 @@
         </div>
         <a class="button button-light" href="#goi-vps">Xem bảng giá <span>↗</span></a>
       </section>
+
+      <section class="my-orders" id="my-orders" hidden>
+        <div class="section-intro">
+          <p class="eyebrow"><span></span> ĐƠN HÀNG CỦA BẠN</p>
+          <h2>Lịch sử đơn hàng.</h2>
+          <p>Trạng thái các đơn bạn đã đăng ký. Admin sẽ liên hệ qua email/SĐT trong đơn.</p>
+        </div>
+        <div id="my-orders-list" class="orders-list"></div>
+      </section>
     </main>
 
     <footer>
@@ -183,16 +192,42 @@
               <div class="total"><dt>Tổng thanh toán</dt><dd id="checkout-price">2.900.000đ</dd></div>
             </dl>
           </div>
-          <div class="payment-card">
-            <div class="payment-heading"><span class="bank-icon">MB</span><span><small>NGÂN HÀNG</small><strong>MB Bank</strong></span></div>
-            <div class="qr-wrap"><img src="public/mbbank-qr.png" alt="Mã QR thanh toán MB Bank cho Nguyễn Thị Dung" /></div>
-            <div class="payment-detail">
-              <span>Số tài khoản</span>
-              <strong>2154050602</strong>
-              <button class="copy-button" type="button" data-copy="2154050602">Sao chép</button>
+          <div class="checkout-flow">
+            <form class="order-form" id="order-form" novalidate>
+              <p class="order-form-heading">Thông tin nhận VPS</p>
+              <label>
+                <span>Họ và tên *</span>
+                <input id="order-name" name="name" type="text" autocomplete="name" placeholder="Nguyễn Văn A" required />
+              </label>
+              <label>
+                <span>Số điện thoại *</span>
+                <input id="order-phone" name="phone" type="tel" autocomplete="tel" placeholder="09xx xxx xxx" required />
+              </label>
+              <label>
+                <span>Email nhận thông tin VPS *</span>
+                <input id="order-email" name="email" type="email" autocomplete="email" placeholder="email@cuaban.com" required />
+              </label>
+              <label>
+                <span>Ghi chú (tuỳ chọn)</span>
+                <textarea id="order-notes" name="notes" rows="2" placeholder="Yêu cầu thêm về OS, datacenter,..."></textarea>
+              </label>
+              <button id="order-submit" class="order-submit" type="submit">
+                Tôi đã chuyển khoản — Ghi nhận đơn <span>→</span>
+              </button>
+              <p class="order-form-tip">Sau khi chuyển khoản, bấm nút trên để ghi nhận đơn. Admin sẽ xác nhận và gửi thông tin VPS qua email trong vòng 1–24 giờ.</p>
+            </form>
+
+            <div class="payment-card">
+              <div class="payment-heading"><span class="bank-icon">MB</span><span><small>NGÂN HÀNG</small><strong>MB Bank</strong></span></div>
+              <div class="qr-wrap"><img src="public/mbbank-qr.png" alt="Mã QR thanh toán MB Bank cho Nguyễn Thị Dung" /></div>
+              <div class="payment-detail">
+                <span>Số tài khoản</span>
+                <strong>2154050602</strong>
+                <button class="copy-button" type="button" data-copy="2154050602">Sao chép</button>
+              </div>
+              <div class="payment-detail"><span>Chủ tài khoản</span><strong>NGUYỄN THỊ DUNG</strong></div>
+              <div class="transfer-note"><span>Nội dung chuyển khoản</span><strong id="transfer-note">VPSVNDEX</strong><button class="copy-button" type="button" id="copy-note">Sao chép</button></div>
             </div>
-            <div class="payment-detail"><span>Chủ tài khoản</span><strong>NGUYỄN THỊ DUNG</strong></div>
-            <div class="transfer-note"><span>Nội dung chuyển khoản</span><strong id="transfer-note">VPSVNDEX</strong><button class="copy-button" type="button" id="copy-note">Sao chép</button></div>
           </div>
         </div>
         <p class="checkout-tip">Lưu ý: Vui lòng kiểm tra đúng tên chủ tài khoản trước khi chuyển. Giữ lại biên lai thanh toán để đối chiếu khi cần.</p>
