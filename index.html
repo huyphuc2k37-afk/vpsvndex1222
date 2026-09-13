@@ -31,7 +31,7 @@
       href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="style.css?v=20260913f" />
+    <link rel="stylesheet" href="style.css?v=20260913g" />
   </head>
   <body>
     <div class="page-noise" aria-hidden="true"></div>
@@ -446,8 +446,76 @@
     </div>
 
     <div class="toast" id="toast" role="status" aria-live="polite">Đã sao chép</div>
+
+    <!-- ============================================================
+         User Dashboard — Trang cá nhân (mở khi click vào email ở header)
+         ============================================================ -->
+    <div class="dashboard" id="dashboard" aria-hidden="true">
+      <div class="dashboard-backdrop" data-close-dashboard></div>
+      <section class="dashboard-panel" role="dialog" aria-modal="true" aria-labelledby="dashboard-title">
+        <button class="close-dashboard" type="button" data-close-dashboard aria-label="Đóng">×</button>
+
+        <header class="dashboard-header">
+          <p class="eyebrow"><span></span> TÀI KHOẢN CỦA BẠN</p>
+          <h2 id="dashboard-title">Quản lý<br /><em>dịch vụ VPS.</em></h2>
+          <div class="dashboard-user">
+            <div class="dashboard-avatar" id="dashboard-avatar">?</div>
+            <div>
+              <strong id="dashboard-email">—</strong>
+              <small id="dashboard-uid">—</small>
+            </div>
+          </div>
+        </header>
+
+        <nav class="dashboard-tabs" role="tablist">
+          <button class="dashboard-tab is-active" data-tab="vps"    role="tab" aria-selected="true">VPS của tôi</button>
+          <button class="dashboard-tab"           data-tab="orders" role="tab" aria-selected="false">Đơn hàng</button>
+          <button class="dashboard-tab"           data-tab="account" role="tab" aria-selected="false">Tài khoản</button>
+        </nav>
+
+        <div class="dashboard-body">
+          <!-- Tab: VPS của tôi -->
+          <section class="dashboard-pane is-active" data-pane="vps">
+            <div id="dashboard-vps-list" class="dashboard-list"></div>
+          </section>
+
+          <!-- Tab: Đơn hàng -->
+          <section class="dashboard-pane" data-pane="orders">
+            <div id="dashboard-orders-list" class="dashboard-list"></div>
+          </section>
+
+          <!-- Tab: Tài khoản -->
+          <section class="dashboard-pane" data-pane="account">
+            <div class="dashboard-account">
+              <div class="account-row">
+                <label>Email</label>
+                <strong id="dashboard-account-email">—</strong>
+              </div>
+              <div class="account-row">
+                <label>Mã người dùng</label>
+                <strong id="dashboard-account-uid">—</strong>
+              </div>
+              <div class="account-row">
+                <label>Ngày tham gia</label>
+                <strong id="dashboard-account-joined">—</strong>
+              </div>
+              <div class="account-row">
+                <label>Số đơn hàng</label>
+                <strong id="dashboard-account-count">0</strong>
+              </div>
+
+              <div class="account-actions-list">
+                <button class="account-btn" type="button" id="dashboard-change-pass">Đổi mật khẩu</button>
+                <button class="account-btn account-btn-danger" type="button" id="dashboard-logout">Đăng xuất</button>
+              </div>
+              <p class="account-tip">Nếu cần hỗ trợ, liên hệ <a href="contact.html">tại đây</a>.</p>
+            </div>
+          </section>
+        </div>
+      </section>
+    </div>
     <script src="supabase.min.js?v=20260913"></script>
     <script src="supabase-config.js?v=20260913"></script>
-    <script src="app.js?v=20260913g"></script>
+    <script src="app.js?v=20260913h"></script>
   </body>
 </html>

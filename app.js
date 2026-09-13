@@ -203,6 +203,147 @@
     }
   }
 
+  /* ===========================================================
+   * USER DASHBOARD — mở từ click email ở header
+   * Tabs: VPS của tôi / Đơn hàng / Tài khoản
+   * =========================================================== */
+  let dashboardTab = 'vps';
+
+  function openDashboard() {
+    if (!state.user) {
+      // chưa login → mở modal đăng nhập
+      openAuth('login');
+      return;
+    }
+    const dash = $('#dashboard');
+    if (!dash) return;
+    fillDashboardHeader();
+    renderDashboard();
+    switchTab('vps');
+    dash.classList.add('is-open');
+    dash.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+    // luôn reload orders mỗi lần mở để có VPS mới nhất (nếu admin vừa cấp)
+    if (typeof loadMyOrders === 'function') loadMyOrders().then(renderDashboard);
+  }
+
+  function closeDashboard() {
+    const dash = $('#dashboard');
+    if (!dash) return;
+    dash.classList.remove('is-open');
+    dash.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+  }
+
+  function fillDashboardHeader() {
+    const user = state.user;
+    if (!user) return;
+    const email = user.email || '';
+    const uid = user.id || '';
+    const avatar = (email[0] || '?').toUpperCase();
+
+    setText('#dashboard-email', email);
+    setText('#dashboard-uid', uid.length > 18 ? uid.slice(0, 8) + '…' + uid.slice(-4) : uid);
+    setText('#dashboard-avatar', avatar);
+
+    // Account tab
+    setText('#dashboard-account-email', email);
+    setText('#dashboard-account-uid', uid);
+    setText('#dashboard-account-joined',
+      user.created_at ? new Date(user.created_at).toLocaleDateString('vi-VN') : '—');
+  }
+
+  function setText(sel, text) {
+    const el = $(sel);
+    if (el) el.textContent = text;
+  }
+
+  function switchTab(name) {
+    dashboardTab = name;
+    $$('.dashboard-tab').forEach((t) => {
+      const active = t.dataset.tab === name;
+      t.classList.toggle('is-active', active);
+      t.setAttribute('aria-selected', active ? 'true' : 'false');
+    });
+    $$('.dashboard-pane').forEach((p) => {
+      p.classList.toggle('is-active', p.dataset.pane === name);
+    });
+    renderDashboard();
+  }
+
+  function renderDashboard() {
+    // đếm số đơn
+    const orderCount = (state.orders || []).length;
+    setText('#dashboard-account-count', String(orderCount));
+
+    // VPS list (chỉ provisioned)
+    const vpsList = $('#dashboard-vps-list');
+    if (vpsList) {
+      const vps = (state.orders || []).filter((o) => o.status === 'provisioned' && o.vps_ip);
+      if (vps.length === 0) {
+        vpsList.innerHTML = '<div class="dashboard-empty">Bạn chưa có VPS nào được cấp. Sau khi admin xác nhận thanh toán, VPS sẽ xuất hiện tại đây.</div>';
+      } else {
+        vpsList.innerHTML = vps.map(orderCard).join('');
+      }
+    }
+
+    // Orders list (tất cả)
+    const orderList = $('#dashboard-orders-list');
+    if (orderList) {
+      const all = state.orders || [];
+      if (all.length === 0) {
+        orderList.innerHTML = '<div class="dashboard-empty">Bạn chưa có đơn hàng nào.</div>';
+      } else {
+        orderList.innerHTML = all.map(orderCard).join('');
+      }
+    }
+  }
+
+  function orderCard(o) {
+    const plan = PACKAGES.find((p) => p.id === o.package_id);
+    const region = REGIONS[o.region];
+    const date = new Date(o.created_at).toLocaleString('vi-VN');
+    const statusLabel = {
+      pending: 'Chờ xác nhận',
+      confirmed: 'Đã xác nhận',
+      provisioned: 'Đã cấp VPS',
+      cancelled: 'Đã hủy',
+    }[o.status] || o.status;
+
+    const credsBlock = (o.status === 'provisioned' && o.vps_ip && o.vps_password) ? `
+      <div class="dashboard-creds">
+        <p class="dashboard-creds-title">🔑 Thông tin VPS của bạn</p>
+        <div class="dashboard-creds-row">
+          <span>Username</span><b>${esc(o.vps_username || 'root')}</b>
+          <button class="copy-btn" type="button" data-copy="${esc(o.vps_username || 'root')}">Sao chép</button>
+        </div>
+        <div class="dashboard-creds-row">
+          <span>Địa chỉ IP</span><b>${esc(o.vps_ip)}</b>
+          <button class="copy-btn" type="button" data-copy="${esc(o.vps_ip)}">Sao chép</button>
+        </div>
+        <div class="dashboard-creds-row">
+          <span>Mật khẩu</span><b>${esc(o.vps_password)}</b>
+          <button class="copy-btn" type="button" data-copy="${esc(o.vps_password)}">Sao chép</button>
+        </div>
+        ${o.admin_notes ? `<div class="dashboard-creds-row"><span>Ghi chú admin</span><em>${esc(o.admin_notes)}</em></div>` : ''}
+      </div>` : '';
+
+    return `
+      <article class="dashboard-card">
+        <div class="dashboard-card-head">
+          <div>
+            <strong>VPS ${esc(plan?.name || o.package_id)}</strong>
+            <p class="dashboard-card-meta">
+              ${esc(region?.label || o.region)} · <b>${formatMoney(o.amount_vnd)}</b> / ${esc(o.cycle || '1m')}
+            </p>
+            <p class="dashboard-card-meta">${esc(date)}</p>
+          </div>
+          <span class="dashboard-status dashboard-status-${esc(o.status)}">${esc(statusLabel)}</span>
+        </div>
+        ${credsBlock}
+      </article>`;
+  }
+
   /* ---------- Checkout modal ---------- */
   function openCheckout(packageId) {
     const plan = PACKAGES.find((p) => p.id === packageId);
@@ -599,7 +740,8 @@
     // Escape key
     document.addEventListener('keydown', (e) => {
       if (e.key !== 'Escape') return;
-      if ($('#auth-modal').classList.contains('is-open')) closeAuth();
+      if ($('#dashboard').classList.contains('is-open')) closeDashboard();
+      else if ($('#auth-modal').classList.contains('is-open')) closeAuth();
       else if ($('#checkout').classList.contains('is-open')) closeCheckout();
     });
 
@@ -623,6 +765,28 @@
     );
     $$('[data-close-auth]').forEach((el) => el.addEventListener('click', closeAuth));
     $('#logout-button')?.addEventListener('click', handleLogout);
+
+    // Dashboard open/close + tabs
+    $$('[data-close-dashboard]').forEach((el) => el.addEventListener('click', closeDashboard));
+    $('#account-email')?.addEventListener('click', openDashboard);
+    $('#account-email')?.setAttribute('role', 'button');
+    $('#account-email')?.setAttribute('title', 'Mở trang cá nhân');
+    $$('.dashboard-tab').forEach((tab) => {
+      tab.addEventListener('click', () => switchTab(tab.dataset.tab));
+    });
+    $('#dashboard-logout')?.addEventListener('click', () => {
+      closeDashboard();
+      handleLogout();
+    });
+    $('#dashboard-change-pass')?.addEventListener('click', () => {
+      if (!state.user?.email) return;
+      const newPass = window.prompt('Nhập mật khẩu mới (tối thiểu 6 ký tự):', '');
+      if (!newPass || newPass.length < 6) { showToast('Mật khẩu phải có ít nhất 6 ký tự.'); return; }
+      supabase.auth.updateUser({ password: newPass }).then(({ error }) => {
+        if (error) showToast('Không đổi được: ' + (error.message || ''));
+        else showToast('Đã đổi mật khẩu thành công.');
+      });
+    });
 
     // Header CTA — nếu click "Chọn VPS" cũng phải qua gate
     document.querySelectorAll('a[href="#goi-vps"]').forEach((a) => {
