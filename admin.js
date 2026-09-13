@@ -92,12 +92,24 @@
   function logout() { try { sessionStorage.removeItem(SESSION_KEY); } catch {} }
 
   function showShell() {
-    $('#admin-login').hidden = true;
-    $('#admin-shell').hidden = false;
+    const login = $('#admin-login');
+    const shell = $('#admin-shell');
+    login.style.setProperty('display', 'none', 'important');
+    if (shell) {
+      shell.hidden = false;
+      shell.style.setProperty('display', 'block', 'important');
+    }
+    // đảm bảo cuộn lên đầu khi vào shell
+    try { window.scrollTo(0, 0); } catch {}
   }
   function showLogin() {
-    $('#admin-login').hidden = false;
-    $('#admin-shell').hidden = true;
+    const login = $('#admin-login');
+    const shell = $('#admin-shell');
+    login.style.removeProperty('display');
+    if (shell) {
+      shell.hidden = true;
+      shell.style.removeProperty('display');
+    }
   }
 
   function setLoginFeedback(msg, type = 'info') {
