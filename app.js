@@ -316,18 +316,43 @@
 
     try {
       if (state.authMode === 'signup') {
+        // Bước 1: tạo tài khoản
         const { data, error } = await supabase.auth.signUp({ email, password });
         if (error) throw error;
+
         if (data?.session) {
+          // Nếu Supabase trả về session luôn (đã tắt confirm email)
           applySession(data.session);
           closeAuth();
           showToast('Đăng ký thành công');
-        } else {
-          setAuthFeedback(
-            'Đăng ký thành công. Kiểm tra email để xác nhận tài khoản trước khi đăng nhập.',
-            'success'
-          );
+          return;
         }
+
+        // Bước 2 (fallback): chưa có session → thử signIn ngay
+        // Hoạt động khi admin đã tắt "Confirm email" trên Supabase
+        try {
+          const { data: signInData, error: signInError } =
+            await supabase.auth.signInWithPassword({ email, password });
+          if (!signInError && signInData?.session) {
+            applySession(signInData.session);
+            closeAuth();
+            showToast('Đăng ký thành công');
+            return;
+          }
+          if (signInError?.message?.toLowerCase().includes('email not confirmed')) {
+            // Trường hợp hiếm: Supabase vẫn bật confirm — vẫn thông báo lỗi rõ ràng
+            setAuthFeedback(
+              'Đăng ký thành công nhưng email chưa được xác nhận. Vui lòng liên hệ support@vpsvndex.com để được kích hoạt.',
+              'error'
+            );
+            return;
+          }
+        } catch (_) { /* fallthrough */ }
+
+        setAuthFeedback(
+          'Đăng ký thành công. Nếu không vào được, vui lòng đăng nhập lại bằng email và mật khẩu vừa tạo.',
+          'success'
+        );
       } else {
         const { data, error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
