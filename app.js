@@ -484,15 +484,33 @@
       const plan = PACKAGES.find((p) => p.id === o.package_id);
       const region = REGIONS[o.region];
       const date = new Date(o.created_at).toLocaleString('vi-VN');
-      const statusLabel = { pending: 'Chờ xác nhận', confirmed: 'Đã xác nhận', cancelled: 'Đã hủy' }[o.status] || o.status;
+      const statusLabel = {
+        pending: 'Chờ xác nhận',
+        confirmed: 'Đã xác nhận',
+        provisioned: 'Đã cấp VPS',
+        cancelled: 'Đã hủy',
+      }[o.status] || o.status;
+
+      const credsBlock = (o.status === 'provisioned' && o.vps_ip && o.vps_password)
+        ? `
+          <div class="order-creds">
+            <p class="order-creds-title">🔑 Thông tin VPS của bạn</p>
+            <div class="order-creds-row"><span>Username</span><b>${esc(o.vps_username || 'root')}</b></div>
+            <div class="order-creds-row"><span>Địa chỉ IP</span><b>${esc(o.vps_ip)}</b></div>
+            <div class="order-creds-row"><span>Mật khẩu</span><b>${esc(o.vps_password)}</b></div>
+            ${o.admin_notes ? `<div class="order-creds-row"><span>Ghi chú</span><em>${esc(o.admin_notes)}</em></div>` : ''}
+          </div>`
+        : '';
+
       return `
-        <article class="order-card">
+        <article class="order-card order-card-${esc(o.status)}">
           <header>
             <strong>VPS ${esc(plan?.name || o.package_id)}</strong>
             <span class="order-status order-status-${esc(o.status)}">${esc(statusLabel)}</span>
           </header>
           <p>${esc(region?.label || o.region)} · ${formatMoney(o.amount_vnd)}</p>
           <p class="order-meta">${esc(date)}</p>
+          ${credsBlock}
         </article>`;
     }).join('');
   }

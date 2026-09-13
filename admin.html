@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Quản trị · VPSVNDEX</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" />
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="admin.css" />
+</head>
+<body class="admin-body">
+  <!-- ============================================================
+       LOGIN GATE (hiện nếu chưa auth)
+       ============================================================ -->
+  <div class="admin-login" id="admin-login">
+    <div class="admin-login-card">
+      <p class="eyebrow"><span></span> KHU VỰC QUẢN TRỊ</p>
+      <h1>Đăng nhập Admin</h1>
+      <p class="muted">Vui lòng đăng nhập để truy cập bảng điều khiển.</p>
+      <form id="admin-login-form" novalidate>
+        <label>
+          <span>Tài khoản</span>
+          <input id="admin-username" type="text" autocomplete="username" required />
+        </label>
+        <label>
+          <span>Mật khẩu</span>
+          <input id="admin-password" type="password" autocomplete="current-password" required />
+        </label>
+        <button type="submit" id="admin-login-submit">Đăng nhập <span>→</span></button>
+        <p class="admin-feedback" id="admin-login-feedback" data-type="info"></p>
+      </form>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       DASHBOARD (hiện sau khi login)
+       ============================================================ -->
+  <main class="admin-shell" id="admin-shell" hidden>
+    <header class="admin-topbar">
+      <div class="admin-brand">
+        <span class="brand-mark">VX</span>
+        <strong>VPSVNDEX · Admin</strong>
+      </div>
+      <div class="admin-topbar-right">
+        <a class="button button-ghost" href="/" target="_blank">Xem trang chủ ↗</a>
+        <button class="button button-dark" type="button" id="admin-logout">Đăng xuất</button>
+      </div>
+    </header>
+
+    <!-- Stats -->
+    <section class="admin-stats" id="admin-stats">
+      <article><span>Tổng đơn</span><strong id="stat-total">0</strong></article>
+      <article><span>Chờ xác nhận</span><strong id="stat-pending">0</strong></article>
+      <article><span>Đã xác nhận</span><strong id="stat-confirmed">0</strong></article>
+      <article><span>Đã cấp VPS</span><strong id="stat-provisioned">0</strong></article>
+      <article><span>Đã hủy</span><strong id="stat-cancelled">0</strong></article>
+      <article class="revenue"><span>Doanh thu</span><strong id="stat-revenue">0đ</strong></article>
+    </section>
+
+    <!-- Toolbar -->
+    <section class="admin-toolbar">
+      <div class="admin-toolbar-left">
+        <input id="admin-search" type="search" placeholder="Tìm theo email, tên, SĐT, mã đơn..." />
+        <select id="admin-filter">
+          <option value="all">Tất cả trạng thái</option>
+          <option value="pending">Chờ xác nhận</option>
+          <option value="confirmed">Đã xác nhận</option>
+          <option value="provisioned">Đã cấp VPS</option>
+          <option value="cancelled">Đã hủy</option>
+        </select>
+      </div>
+      <button class="button button-dark" type="button" id="admin-refresh">↻ Làm mới</button>
+    </section>
+
+    <!-- Orders table -->
+    <section class="admin-table-wrap">
+      <table class="admin-table" id="admin-table">
+        <thead>
+          <tr>
+            <th>Mã đơn</th>
+            <th>Khách hàng</th>
+            <th>Gói</th>
+            <th>Khu vực</th>
+            <th>Số tiền</th>
+            <th>Trạng thái</th>
+            <th>Ngày tạo</th>
+            <th>VPS</th>
+            <th>Hành động</th>
+          </tr>
+        </thead>
+        <tbody id="admin-tbody">
+          <tr><td colspan="9" class="admin-loading">Đang tải...</td></tr>
+        </tbody>
+      </table>
+    </section>
+  </main>
+
+  <!-- ============================================================
+       MODAL — cấp VPS (provision) hoặc xem chi tiết
+       ============================================================ -->
+  <div class="modal" id="provision-modal" aria-hidden="true">
+    <div class="modal-backdrop" data-close-modal></div>
+    <div class="modal-dialog">
+      <button class="modal-close" type="button" data-close-modal>×</button>
+      <header class="modal-head">
+        <p class="eyebrow"><span></span> CẤP THÔNG TIN VPS</p>
+        <h3 id="provision-title">Đơn #…</h3>
+      </header>
+      <div class="modal-body">
+        <div class="provision-summary" id="provision-summary"></div>
+        <form id="provision-form" novalidate>
+          <label>
+            <span>Username SSH *</span>
+            <input id="prov-username" type="text" value="root" required />
+          </label>
+          <label>
+            <span>Địa chỉ IP *</span>
+            <div class="prov-row">
+              <input id="prov-ip" type="text" placeholder="103.x.x.x" required />
+              <button type="button" class="button button-ghost" id="prov-random-ip">🎲 Random</button>
+            </div>
+          </label>
+          <label>
+            <span>Mật khẩu *</span>
+            <div class="prov-row">
+              <input id="prov-password" type="text" required />
+              <button type="button" class="button button-ghost" id="prov-random-pw">🎲 Random</button>
+            </div>
+          </label>
+          <label>
+            <span>Ghi chú admin (tuỳ chọn)</span>
+            <textarea id="prov-notes" rows="2" placeholder="OS, datacenter, ngày hết hạn..."></textarea>
+          </label>
+          <div class="provision-actions">
+            <button type="button" class="button button-ghost" data-close-modal>Huỷ</button>
+            <button type="submit" class="button button-dark" id="prov-submit">💾 Cấp VPS & lưu</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
+  <script src="admin.js"></script>
+</body>
+</html>

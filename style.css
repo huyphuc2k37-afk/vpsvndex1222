@@ -1609,3 +1609,55 @@ footer .brand-mark { transform: skew(-18deg) scale(.8); transform-origin: left; 
 @media (max-width: 760px) {
   .checkout-flow { grid-template-columns: 1fr; }
 }
+
+/* =============================================================
+   Order credentials (hiện khi admin đã cấp VPS)
+   ============================================================= */
+.order-creds {
+  margin-top: 10px;
+  padding: 12px 14px;
+  background: linear-gradient(135deg, rgba(108, 246, 189, 0.12), rgba(78, 185, 255, 0.08));
+  border: 1px solid rgba(108, 246, 189, 0.35);
+  border-radius: var(--radius-sm);
+}
+.order-creds-title {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--mint-deep);
+  font-weight: 700;
+  margin: 0 0 8px;
+}
+.order-creds-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 0;
+  font-size: 13px;
+  border-top: 1px dashed rgba(12, 73, 54, 0.18);
+}
+.order-creds-row:first-of-type { border-top: 0; }
+.order-creds-row span {
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 11.5px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
+.order-creds-row b {
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 13.5px;
+  font-weight: 700;
+  word-break: break-all;
+  text-align: right;
+}
+.order-creds-row em {
+  color: var(--text-soft);
+  font-size: 12.5px;
+  font-style: normal;
+  text-align: right;
+}
