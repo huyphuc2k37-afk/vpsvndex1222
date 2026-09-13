@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Blog VPSVNDEX — kiến thức VPS, hosting, hạ tầng máy chủ từ 2019." />
+    <title>Blog · VPSVNDEX</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="style.css?v=20260913d" />
+    <link rel="stylesheet" href="site.css" />
+  </head>
+  <body>
+    <div class="page-noise" aria-hidden="true"></div>
+    <header class="site-header">
+      <a class="brand" href="index.html"><span class="brand-mark"><i></i><i></i><i></i></span><span>VPS<span>VNDEX</span></span></a>
+      <nav aria-label="Điều hướng chính">
+        <a href="index.html#goi-vps">Bảng giá</a>
+        <a href="index.html#ly-do">Ưu điểm</a>
+        <a href="blog.html" class="is-active">Blog</a>
+        <a href="about.html">Giới thiệu</a>
+        <a href="contact.html">Liên hệ</a>
+      </nav>
+      <div class="header-actions">
+        <a class="header-cta" href="index.html#goi-vps">Chọn VPS <span>↗</span></a>
+      </div>
+    </header>
+
+    <main class="container page-wrap">
+      <section class="page-hero">
+        <p class="eyebrow"><span></span> BLOG &amp; KIẾN THỨC</p>
+        <h1>Chia sẻ từ đội ngũ kỹ thuật<br /><em>không hoa mỹ</em>, chỉ thực chiến.</h1>
+        <p class="page-hero-lead">
+          Sáu năm vận hành hạ tầng cho hàng trăm nghìn khách hàng — chúng tôi tổng hợp lại thành những bài viết bạn có thể đọc trong 5–10 phút.
+        </p>
+      </section>
+
+      <section class="blog-filters">
+        <button class="blog-filter is-active" type="button" data-filter="all">Tất cả</button>
+        <button class="blog-filter" type="button" data-filter="beginner">Người mới</button>
+        <button class="blog-filter" type="button" data-filter="tuning">Tối ưu</button>
+        <button class="blog-filter" type="button" data-filter="market">Thị trường</button>
+        <button class="blog-filter" type="button" data-filter="case">Case study</button>
+      </section>
+
+      <section class="blog-grid" id="blog-grid">
+        <a class="blog-card" data-topic="beginner" href="blog/vps-la-gi.html">
+          <span class="blog-year">2019</span>
+          <span class="resource-tag">Người mới</span>
+          <h3>VPS là gì? Khác gì với Shared Hosting?</h3>
+          <p>Giải thích từ A–Z bằng ví dụ thực tế. Bài đầu tiên trên blog, đến nay vẫn được đọc nhiều nhất.</p>
+          <span class="resource-meta">12/03/2019 · 5 phút đọc · Nguyễn Minh Khoa</span>
+        </a>
+        <a class="blog-card" data-topic="beginner" href="blog/chon-vps-web.html">
+          <span class="blog-year">2019</span>
+          <span class="resource-tag">Người mới</span>
+          <h3>5 tiêu chí chọn VPS để chạy website</h3>
+          <p>Bạn không cần gói lớn nhất. Chỉ cần gói phù hợp với traffic thực tế của bạn.</p>
+          <span class="resource-meta">21/06/2019 · 6 phút đọc · Phạm Quốc Đạt</span>
+        </a>
+        <a class="blog-card" data-topic="case" href="blog/case-study-startup.html">
+          <span class="blog-year">2020</span>
+          <span class="resource-tag">Case study</span>
+          <h3>Startup fintech scale từ 0 đến 50.000 người dùng</h3>
+          <p>Câu chuyện thật từ khách hàng: chọn cấu hình nào, sai lầm đầu tiên, và cách chúng tôi đồng hành.</p>
+          <span class="resource-meta">14/10/2020 · 12 phút đọc · Trần Thị Hồng Nhung</span>
+        </a>
+        <a class="blog-card" data-topic="tuning" href="blog/toi-uu-mysql.html">
+          <span class="blog-year">2021</span>
+          <span class="resource-tag">Tối ưu</span>
+          <h3>Tuning MySQL trên VPS 4GB RAM</h3>
+          <p>File cấu hình thực tế mà đội ngũ chúng tôi dùng cho khách hàng WordPress có ~500K records/tháng.</p>
+          <span class="resource-meta">03/04/2021 · 9 phút đọc · Lê Hoàng Sơn</span>
+        </a>
+        <a class="blog-card" data-topic="tuning" href="blog/cau-hinh-vps.html">
+          <span class="blog-year">2024</span>
+          <span class="resource-tag">Tối ưu</span>
+          <h3>Chọn cấu hình VPS phù hợp với dự án</h3>
+          <p>Công thức ước lượng CPU/RAM/disk theo loại ứng dụng — cập nhật cho 2024.</p>
+          <span class="resource-meta">04/07/2024 · 8 phút đọc · Nguyễn Minh Khoa</span>
+        </a>
+        <a class="blog-card" data-topic="case" href="blog/migration-doanh-nghiep.html">
+          <span class="blog-year">2025</span>
+          <span class="resource-tag">Case study</span>
+          <h3>Migration 80 server từ on-premise lên cloud</h3>
+          <p>Quy trình 6 tuần, downtime dưới 2 phút/server, không mất dữ liệu. Toàn bộ checklist.</p>
+          <span class="resource-meta">18/03/2025 · 15 phút đọc · Trần Thị Hồng Nhung</span>
+        </a>
+        <a class="blog-card" data-topic="market" href="blog/vps-viet-nam-2026.html">
+          <span class="blog-year">2026</span>
+          <span class="resource-tag">Thị trường</span>
+          <h3>VPS Việt Nam 2026: xu hướng và lựa chọn</h3>
+          <p>Phân tích thị trường hosting Việt Nam và vì sao latency thấp vẫn là lợi thế cạnh tranh.</p>
+          <span class="resource-meta">21/02/2026 · 10 phút đọc · Phạm Quốc Đạt</span>
+        </a>
+        <a class="blog-card" data-topic="beginner" href="blog/ssl-mien-phi.html">
+          <span class="blog-year">2022</span>
+          <span class="resource-tag">Người mới</span>
+          <h3>Cài SSL miễn phí với Let's Encrypt trên VPS</h3>
+          <p>Hướng dẫn từng bước cho người lần đầu quản trị server.</p>
+          <span class="resource-meta">08/09/2022 · 7 phút đọc · Lê Hoàng Sơn</span>
+        </a>
+      </section>
+    </main>
+
+    <footer>
+      <div class="footer-top">
+        <div class="footer-brand-col">
+          <a class="brand" href="index.html"><span class="brand-mark"><i></i><i></i><i></i></span><span>VPS<span>VNDEX</span></span></a>
+          <p class="footer-tagline">Hạ tầng VPS Việt Nam &amp; Hoa Kỳ — đồng hành cùng doanh nghiệp từ 2019.</p>
+          <div class="footer-contact">
+            <a href="mailto:support@vpsvndex.com"><span>✉</span> support@vpsvndex.com</a>
+          </div>
+        </div>
+        <div class="footer-col">
+          <h4>Sản phẩm</h4>
+          <a href="index.html#goi-vps">Bảng giá VPS</a>
+        </div>
+        <div class="footer-col">
+          <h4>Tài nguyên</h4>
+          <a href="blog.html">Blog</a>
+          <a href="about.html">Về chúng tôi</a>
+          <a href="contact.html">Liên hệ</a>
+        </div>
+        <div class="footer-col">
+          <h4>Pháp lý</h4>
+          <a href="terms.html">Điều khoản</a>
+          <a href="privacy.html">Bảo mật</a>
+          <a href="refund.html">Hoàn tiền</a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© <span id="year"></span> VPSVNDEX</span>
+        <span class="footer-stamp">Vận hành từ 2019 · Đã phục vụ 300.000+ khách hàng</span>
+      </div>
+    </footer>
+    <script>document.getElementById('year').textContent = new Date().getFullYear();</script>
+    <script>
+      (function () {
+        const filters = document.querySelectorAll('.blog-filter');
+        const cards = document.querySelectorAll('.blog-card');
+        filters.forEach((b) => b.addEventListener('click', () => {
+          filters.forEach((x) => x.classList.remove('is-active'));
+          b.classList.add('is-active');
+          const f = b.dataset.filter;
+          cards.forEach((c) => {
+            c.style.display = (f === 'all' || c.dataset.topic === f) ? '' : 'none';
+          });
+        }));
+      })();
+    </script>
+  </body>
+</html>
