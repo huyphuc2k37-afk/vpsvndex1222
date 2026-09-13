@@ -12,6 +12,19 @@
   'use strict';
 
   /* ===========================================================
+   * 0. CACHE KILLER — buộc browser luôn load JS mới nhất
+   *    Nếu có service worker cũ cache file → unregister + reload
+   * =========================================================== */
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.getRegistrations().then((regs) => {
+      regs.forEach((r) => r.unregister());
+    });
+  }
+  if ('caches' in window) {
+    caches.keys().then((keys) => keys.forEach((k) => caches.delete(k)));
+  }
+
+  /* ===========================================================
    * 1. DATA
    * =========================================================== */
   const PACKAGES = [
