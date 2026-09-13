@@ -10,25 +10,45 @@ permissions:
   pages: write
   id-token: write
 
+# Đảm bảo không chạy chồng nhau nhiều lần deploy
 concurrency:
   group: pages
   cancel-in-progress: false
 
+# Cho phép các bước chạy đầu tiên (khi Pages chưa enable)
 jobs:
-  deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+  # 1) Enable Pages 1 lần đầu (no-op ở các lần sau)
+  enable-pages:
+    if: github.event.repository.fork == false
+    runs-on: ubuntu-latest
+    outputs:
+      pages_enabled: ${{ steps.enable.outputs.pages_enabled }}
+    steps:
+      - id: enable
+        uses: actions/configure-pages@v5
+
+  # 2) Build + upload artifact
+  build:
+    needs: enable-pages
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Configure Pages
+      - name: Setup Pages
         uses: actions/configure-pages@v5
-      - name: Upload site artifact
+      - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: .
+
+  # 3) Deploy
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
