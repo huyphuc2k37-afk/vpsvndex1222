@@ -211,7 +211,8 @@
     const form = $('#order-form');
     if (form) {
       form.reset();
-      if (state.user?.email) $('#order-email').value = state.user.email;
+      const emailInput = $('#order-email');
+      if (emailInput && state.user?.email) emailInput.value = state.user.email;
     }
 
     // Lưu intent để handler biết tạo đơn cho gói nào

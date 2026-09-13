@@ -2,10 +2,29 @@
 
 ## Lỗi hiện tại
 > "Không tải được danh list đơn: Could not find the function public.admin_list_orders without parameters in the schema cache"
+>
+> HOẶC
+>
+> "ERROR: 42P01: relation 'orders' does not exist"
 
-Nghĩa là Supabase chưa có các RPC function mà admin.js gọi tới.
+Nghĩa là Supabase chưa có các RPC function mà admin.js gọi tới, hoặc bảng `orders` chưa được tạo.
 
-## Bước 1 — Chạy SQL migration (BẮT BUỘC)
+## Bước 0 — Chạy schema bảng (BẮT BUỘC nếu chưa có bảng orders)
+
+Nếu bạn gặp lỗi `relation "orders" does not exist`, project của bạn chưa có bảng. Chạy file này **TRƯỚC**:
+
+1. Truy cập **Supabase Dashboard**: https://supabase.com/dashboard
+2. Chọn project **VPSVNDEX** (ref: `jmttogxuzsefvxrjplaf`)
+3. Vào **SQL Editor** (icon ở menu trái)
+4. Bấm **New query**
+5. Mở file `C:\Users\Admin\Documents\vpsvndex\supabase-orders-schema.sql` bằng Notepad/VSCode
+6. **Ctrl+A → Ctrl+C** toàn bộ nội dung
+7. **Ctrl+V** vào SQL Editor
+8. Bấm **Run** (hoặc Ctrl+Enter)
+
+Sẽ thấy kết quả cuối: `orders table created` và `0` rows.
+
+## Bước 1 — Chạy SQL migration admin
 
 1. Truy cập **Supabase Dashboard**: https://supabase.com/dashboard
 2. Chọn project **VPSVNDEX** (ref: `jmttogxuzsefvxrjplaf`)
