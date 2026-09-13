@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="VPSVNDEX — Chọn VPS Việt Nam hoặc US, thanh toán chuyển khoản nhanh."
+    />
+    <meta name="theme-color" content="#071b33" />
+    <title>VPSVNDEX — VPS Việt Nam & US</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css?v=20260913d" />
+  </head>
+  <body>
+    <div class="page-noise" aria-hidden="true"></div>
+    <header class="site-header">
+      <a class="brand" href="#top" aria-label="VPSVNDEX trang chủ">
+        <span class="brand-mark"><i></i><i></i><i></i></span>
+        <span>VPS<span>VNDEX</span></span>
+      </a>
+      <nav aria-label="Điều hướng chính">
+        <a href="#goi-vps">Bảng giá</a>
+        <a href="#ly-do">Ưu điểm</a>
+        <a href="#huong-dan">Hướng dẫn</a>
+      </nav>
+      <div class="header-actions">
+        <div class="guest-actions" id="guest-actions">
+          <button class="login-link" type="button" data-open-auth="login">Đăng nhập</button>
+          <button class="signup-link" type="button" data-open-auth="signup">Đăng ký</button>
+        </div>
+        <div class="account-actions" id="account-actions" hidden>
+          <span class="account-email" id="account-email"></span>
+          <button class="logout-link" type="button" id="logout-button">Đăng xuất</button>
+        </div>
+        <a class="header-cta" href="#goi-vps">Chọn VPS <span>↗</span></a>
+      </div>
+    </header>
+
+    <main id="top">
+      <section class="hero">
+        <div class="hero-copy">
+          <p class="eyebrow"><span></span> HẠ TẦNG SẴN SÀNG 24/7</p>
+          <h1>VPS mạnh mẽ.<br /><em>Chọn là dùng.</em></h1>
+          <p class="hero-description">
+            Lựa chọn tài nguyên phù hợp cho công việc của bạn, tại Việt Nam hoặc Hoa Kỳ.
+            Giá rõ ràng, cấu hình dễ so sánh.
+          </p>
+          <div class="hero-actions">
+            <a class="button button-primary" href="#goi-vps">Khám phá gói VPS <span>↓</span></a>
+            <a class="button button-text" href="#huong-dan">Cách thanh toán <span>→</span></a>
+          </div>
+          <div class="hero-note">
+            <span class="pulse-dot"></span>
+            <span>Hệ thống đang nhận đơn</span>
+          </div>
+        </div>
+
+        <div class="hero-visual" aria-label="Minh hoạ hạ tầng VPS">
+          <div class="orb orb-one"></div>
+          <div class="orb orb-two"></div>
+          <div class="server-rack">
+            <div class="rack-heading"><span>VPSVNDEX</span><b>● ONLINE</b></div>
+            <div class="server-line"><span>NODE · VN-01</span><i></i><i></i><i></i></div>
+            <div class="server-line"><span>NODE · US-02</span><i></i><i></i><i></i></div>
+            <div class="server-line"><span>NVME · READY</span><i></i><i></i><i></i></div>
+            <div class="server-line"><span>UPTIME · 99.9%</span><i></i><i></i><i></i></div>
+            <div class="rack-footer"><span>01</span><span>02</span><span>03</span><span>04</span></div>
+          </div>
+          <div class="floating-stat stat-location"><span class="flag">🇻🇳</span><div><small>Vị trí</small><strong>Việt Nam</strong></div></div>
+          <div class="floating-stat stat-speed"><small>TỐC ĐỘ MẠNG</small><strong>1 Gbps</strong><span>Ổn định · Kết nối nhanh</span></div>
+          <div class="grid-plane"></div>
+        </div>
+      </section>
+
+      <section class="trust-strip" aria-label="Thông số nổi bật">
+        <div><strong>NVMe</strong><span>lưu trữ tốc độ cao</span></div>
+        <div><strong>IPv4</strong><span>địa chỉ IP riêng</span></div>
+        <div><strong>US / VN</strong><span>2 lựa chọn vị trí</span></div>
+        <div><strong>24/7</strong><span>vận hành liên tục</span></div>
+      </section>
+
+      <section class="pricing-section" id="goi-vps">
+        <div class="section-intro">
+          <p class="eyebrow"><span></span> VPS THEO NHU CẦU</p>
+          <div class="intro-row">
+            <h2>Chọn vị trí.<br />Chọn hiệu năng.</h2>
+            <p>Giá thuê theo tháng, minh bạch và cố định theo từng gói.</p>
+          </div>
+        </div>
+
+        <div class="region-switcher" role="tablist" aria-label="Chọn vị trí VPS">
+          <button class="region-tab is-active" role="tab" aria-selected="true" data-region="vn">
+            <span class="region-icon">🇻🇳</span><span><b>VPS Việt Nam</b><small>Hà Nội · TP. Hồ Chí Minh</small></span>
+          </button>
+          <button class="region-tab" role="tab" aria-selected="false" data-region="us">
+            <span class="region-icon">🇺🇸</span><span><b>VPS US</b><small>Los Angeles · Hoa Kỳ</small></span>
+          </button>
+          <span class="region-network"><i></i> Cổng mạng 1 Gbps</span>
+        </div>
+
+        <div class="plans-grid" id="plans-grid" aria-live="polite"></div>
+        <p class="pricing-footnote">* Giá chưa bao gồm các yêu cầu nâng cấp hoặc dịch vụ riêng theo nhu cầu.</p>
+      </section>
+
+      <section class="benefits" id="ly-do">
+        <div class="benefit-intro">
+          <p class="eyebrow"><span></span> TẬP TRUNG VÀO ĐIỀU QUAN TRỌNG</p>
+          <h2>Tài nguyên rõ ràng,<br />quyết định nhanh hơn.</h2>
+        </div>
+        <div class="benefit-grid">
+          <article>
+            <span class="benefit-number">01</span>
+            <h3>Chọn theo tài nguyên</h3>
+            <p>So sánh trực tiếp vCPU, RAM và dung lượng NVMe giữa các gói.</p>
+          </article>
+          <article>
+            <span class="benefit-number">02</span>
+            <h3>Đúng vị trí cần dùng</h3>
+            <p>Linh hoạt lựa chọn VPS đặt tại Việt Nam hoặc Hoa Kỳ theo nhu cầu kết nối.</p>
+          </article>
+          <article>
+            <span class="benefit-number">03</span>
+            <h3>Thanh toán rõ ràng</h3>
+            <p>Chọn gói rồi xem ngay số tiền, thông tin chuyển khoản và mã QR thanh toán.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="how-it-works" id="huong-dan">
+        <div class="how-title">
+          <p class="eyebrow"><span></span> BA BƯỚC ĐƠN GIẢN</p>
+          <h2>Bắt đầu trong<br />vài phút.</h2>
+        </div>
+        <ol>
+          <li><span>01</span><div><h3>Chọn vị trí</h3><p>Chọn VPS Việt Nam hoặc US.</p></div></li>
+          <li><span>02</span><div><h3>Chọn cấu hình</h3><p>Chọn gói phù hợp với nhu cầu.</p></div></li>
+          <li><span>03</span><div><h3>Thanh toán</h3><p>Quét QR hoặc chuyển khoản theo thông tin hiển thị.</p></div></li>
+        </ol>
+      </section>
+
+      <section class="cta-banner">
+        <div>
+          <p class="eyebrow"><span></span> SẴN SÀNG BẮT ĐẦU?</p>
+          <h2>Tìm gói VPS phù hợp<br />với bạn ngay hôm nay.</h2>
+        </div>
+        <a class="button button-light" href="#goi-vps">Xem bảng giá <span>↗</span></a>
+      </section>
+    </main>
+
+    <footer>
+      <a class="brand" href="#top"><span class="brand-mark"><i></i><i></i><i></i></span><span>VPS<span>VNDEX</span></span></a>
+      <p>VPS Việt Nam &amp; US · Hạ tầng cho công việc của bạn.</p>
+      <nav class="footer-links" aria-label="Liên kết pháp lý">
+        <a href="terms.html">Điều khoản</a>
+        <a href="privacy.html">Bảo mật</a>
+        <a href="refund.html">Hoàn tiền</a>
+      </nav>
+      <span>© <span id="year"></span> VPSVNDEX</span>
+    </footer>
+
+    <div class="checkout" id="checkout" aria-hidden="true">
+      <div class="checkout-backdrop" data-close-checkout></div>
+      <section class="checkout-panel" role="dialog" aria-modal="true" aria-labelledby="checkout-title">
+        <button class="close-checkout" type="button" data-close-checkout aria-label="Đóng thanh toán">×</button>
+        <div class="checkout-header">
+          <p class="eyebrow"><span></span> THANH TOÁN ĐƠN HÀNG</p>
+          <h2 id="checkout-title">Hoàn tất<br /><em>đăng ký VPS.</em></h2>
+          <p>Quét mã QR hoặc chuyển khoản chính xác theo thông tin bên dưới.</p>
+        </div>
+        <div class="checkout-body">
+          <div class="order-summary">
+            <span>GÓI ĐÃ CHỌN</span>
+            <strong id="checkout-plan">VPS Nền tảng</strong>
+            <p id="checkout-region">Việt Nam · Hà Nội / TP. Hồ Chí Minh</p>
+            <dl>
+              <div><dt>Chu kỳ</dt><dd>01 tháng</dd></div>
+              <div class="total"><dt>Tổng thanh toán</dt><dd id="checkout-price">2.900.000đ</dd></div>
+            </dl>
+          </div>
+          <div class="payment-card">
+            <div class="payment-heading"><span class="bank-icon">MB</span><span><small>NGÂN HÀNG</small><strong>MB Bank</strong></span></div>
+            <div class="qr-wrap"><img src="public/mbbank-qr.png" alt="Mã QR thanh toán MB Bank cho Nguyễn Thị Dung" /></div>
+            <div class="payment-detail">
+              <span>Số tài khoản</span>
+              <strong>2154050602</strong>
+              <button class="copy-button" type="button" data-copy="2154050602">Sao chép</button>
+            </div>
+            <div class="payment-detail"><span>Chủ tài khoản</span><strong>NGUYỄN THỊ DUNG</strong></div>
+            <div class="transfer-note"><span>Nội dung chuyển khoản</span><strong id="transfer-note">VPSVNDEX</strong><button class="copy-button" type="button" id="copy-note">Sao chép</button></div>
+          </div>
+        </div>
+        <p class="checkout-tip">Lưu ý: Vui lòng kiểm tra đúng tên chủ tài khoản trước khi chuyển. Giữ lại biên lai thanh toán để đối chiếu khi cần.</p>
+      </section>
+    </div>
+
+    <div class="auth-modal" id="auth-modal" aria-hidden="true">
+      <div class="auth-backdrop" data-close-auth></div>
+      <section class="auth-panel" role="dialog" aria-modal="true" aria-labelledby="auth-title">
+        <button class="close-auth" type="button" data-close-auth aria-label="Đóng biểu mẫu tài khoản">×</button>
+        <p class="eyebrow"><span></span> TÀI KHOẢN VPSVNDEX</p>
+        <h2 id="auth-title">Đăng nhập<br /><em>để tiếp tục.</em></h2>
+        <p class="auth-description">Đăng nhập để tiếp tục thanh toán và quản lý đơn hàng của bạn.</p>
+        <div class="auth-tabs" role="tablist" aria-label="Đăng nhập hoặc đăng ký">
+          <button class="auth-tab is-active" type="button" role="tab" aria-selected="true" data-auth-mode="login">Đăng nhập</button>
+          <button class="auth-tab" type="button" role="tab" aria-selected="false" data-auth-mode="signup">Tạo tài khoản</button>
+        </div>
+        <form class="auth-form" id="auth-form" novalidate>
+          <label>
+            <span>Email</span>
+            <input id="auth-email-input" name="email" type="email" autocomplete="email" placeholder="email@cuaban.com" required />
+          </label>
+          <label>
+            <span>Mật khẩu</span>
+            <input id="auth-password-input" name="password" type="password" autocomplete="current-password" minlength="8" placeholder="Tối thiểu 8 ký tự" required />
+          </label>
+          <label id="confirm-password-field" hidden>
+            <span>Xác nhận mật khẩu</span>
+            <input id="auth-confirm-input" name="confirmPassword" type="password" autocomplete="new-password" minlength="8" placeholder="Nhập lại mật khẩu" />
+          </label>
+          <p class="auth-feedback" id="auth-feedback" role="status" aria-live="polite"></p>
+          <button class="auth-submit" id="auth-submit" type="submit">Đăng nhập <span>→</span></button>
+        </form>
+        <p class="auth-privacy">Mật khẩu được xử lý bởi hệ thống xác thực bảo mật và không được lưu trực tiếp trên website.</p>
+      </section>
+    </div>
+
+    <div class="toast" id="toast" role="status" aria-live="polite">Đã sao chép</div>
+    <script src="supabase.min.js?v=20260913"></script>
+    <script src="supabase-config.js?v=20260913"></script>
+    <script src="app.js?v=20260913e"></script>
+  </body>
+</html>
