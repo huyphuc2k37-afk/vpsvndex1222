@@ -55,6 +55,19 @@ img { max-width: 100%; display: block; }
 .container { max-width: var(--container); padding: 0 var(--pad); margin: 0 auto; }
 
 /* =============================================================
+   SAFETY: đảm bảo mọi <section> đều có padding ngang
+   và nội dung không tràn full-width khi không dùng .container
+   ============================================================= */
+main > section {
+  padding-left: max(var(--pad), env(safe-area-inset-left));
+  padding-right: max(var(--pad), env(safe-area-inset-right));
+  box-sizing: border-box;
+}
+@media (max-width: 720px) {
+  main > section { padding-left: 20px; padding-right: 20px; }
+}
+
+/* =============================================================
    Page noise overlay
    ============================================================= */
 .page-noise {
@@ -74,10 +87,12 @@ img { max-width: 100%; display: block; }
 }
 .brand {
   display: inline-flex; align-items: center; gap: 10px;
-  font-size: 18px; font-weight: 800; letter-spacing: -.5px;
+  font-size: 19px; font-weight: 800; letter-spacing: -.3px;
   color: var(--ink);
+  white-space: nowrap;
 }
-.brand > span:last-child span { color: var(--blue); }
+.brand > span:last-child { font-weight: 800; }
+.brand > span:last-child span { color: var(--blue); font-weight: 800; }
 .brand-mark {
   width: 26px; height: 26px; display: flex; align-items: center; gap: 3px;
   transform: skew(-18deg);
