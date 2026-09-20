@@ -59,8 +59,8 @@
     {
       id: 'pro',
       name: 'Hiệu năng',
-      tag: 'ĐƯỢC CHỌN NHIỀU',
-      subtitle: 'Dư dả cho e‑commerce, WordPress lớn, backend production.',
+      tag: 'ĐƯỢC CHỌN NHIỀU · AI READY',
+      subtitle: 'Dư dả cho e‑commerce, WordPress lớn, backend production + AI local.',
       price: 4500000,
       popular: true,
       specs: {
@@ -69,13 +69,15 @@
         disk: '500 GB NVMe',
         bandwidth: '1 Gbps · quốc tế',
         ipv4: '01 IPv4 riêng',
+        gpu: 'NVIDIA RTX A4000 16GB GDDR6',
+        gpu_use: 'Stable Diffusion · FLUX · Gen Video · LLM Fine-tune',
       },
     },
     {
       id: 'max',
       name: 'Chuyên dụng',
-      tag: 'TÀI NGUYÊN CAO',
-      subtitle: 'Workload nặng: AI/ML, database lớn, SaaS nhiều tenant.',
+      tag: 'TÀI NGUYÊN CAO · AI POWER',
+      subtitle: 'Workload nặng: AI/ML, gen video AI, database lớn, SaaS nhiều tenant.',
       price: 5300000,
       specs: {
         cpu: '16 vCPU · AMD EPYC',
@@ -83,6 +85,8 @@
         disk: '800 GB NVMe',
         bandwidth: '1 Gbps · quốc tế',
         ipv4: '01 IPv4 riêng',
+        gpu: 'NVIDIA RTX 4090 24GB GDDR6X',
+        gpu_use: 'CogVideoX · LTX Video · SD 3 · Training · Production AI',
       },
     },
   ];
@@ -164,9 +168,20 @@
 
     grid.innerHTML = PACKAGES.map((plan) => {
       const bandwidth = plan.id === 'starter' ? '1 Gbps · shared' : regionBandwidth;
+
+      const gpuBlock = plan.specs.gpu ? `
+        <li class="plan-gpu">
+          <span>GPU</span>
+          <b>
+            <span class="gpu-badge">⚡ ${esc(plan.specs.gpu)}</span>
+            ${plan.specs.gpu_use ? `<br><small>${esc(plan.specs.gpu_use)}</small>` : ''}
+          </b>
+        </li>` : '';
+
       return `
-        <article class="plan-card ${plan.popular ? 'is-featured' : ''}">
+        <article class="plan-card ${plan.popular ? 'is-featured' : ''} ${plan.specs.gpu ? 'has-gpu' : ''}">
           ${plan.popular ? '<span class="popular">PHỔ BIẾN</span>' : ''}
+          ${plan.specs.gpu ? '<span class="popular gpu-popular">⚡ AI READY</span>' : ''}
           <p class="plan-tag">${esc(plan.tag)}</p>
           <h3 class="plan-name">VPS ${esc(plan.name)}</h3>
           <p class="plan-subtitle">${esc(plan.subtitle)}</p>
@@ -177,6 +192,7 @@
             <li><span>Ổ cứng</span><b>${esc(plan.specs.disk)}</b></li>
             <li><span>Băng thông</span><b>${esc(bandwidth)}</b></li>
             <li><span>Địa chỉ IP</span><b>${esc(plan.specs.ipv4)}</b></li>
+            ${gpuBlock}
             <li><span>Vị trí</span><b>${esc(region.label)}</b></li>
           </ul>
           <button class="plan-button" type="button" data-package="${esc(plan.id)}">

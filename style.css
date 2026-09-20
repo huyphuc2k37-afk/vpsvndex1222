@@ -584,6 +584,42 @@ h1, h2, h3 { margin: 0; font-weight: 800; letter-spacing: -.6px; line-height: 1.
   font: 700 9px var(--mono);
   letter-spacing: .8px;
 }
+
+/* GPU badge + style cho plan có GPU */
+.gpu-popular {
+  top: -11px; right: auto; left: 16px;
+  background: linear-gradient(135deg, #ffd700, #ff8c00);
+  color: #2a1500;
+  text-shadow: 0 1px 0 rgba(255,255,255,.4);
+  box-shadow: 0 4px 12px rgba(255, 140, 0, .35);
+}
+.plan-card.has-gpu {
+  border-color: rgba(255, 140, 0, .45);
+  box-shadow: 0 0 0 1px rgba(255, 140, 0, .12), 0 12px 30px rgba(255, 140, 0, .08);
+}
+.plan-card.has-gpu::before {
+  content: '';
+  position: absolute; inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg, #ffd700, #ff8c00, transparent 70%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+          mask-composite: exclude;
+  pointer-events: none;
+  opacity: .7;
+}
+.plan-gpu { background: linear-gradient(90deg, rgba(255,140,0,.08), transparent 70%); margin: 0 -12px; padding: 10px 12px; border-radius: 4px; }
+.plan-gpu b { color: var(--ink); }
+.plan-gpu b small { display: block; margin-top: 4px; font-size: 11px; font-weight: 400; color: var(--text-soft); }
+.gpu-badge {
+  display: inline-block; padding: 3px 8px;
+  background: linear-gradient(135deg, #2a1500, #4d2900);
+  color: #ffd700;
+  border-radius: 4px;
+  font: 600 12px var(--mono);
+  letter-spacing: .3px;
+}
 .pricing-footnote {
   max-width: var(--container);
   margin: 20px auto 0;
