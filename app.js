@@ -488,10 +488,25 @@
     submit.disabled = true;
     setAuthFeedback('Đang xử lý…', 'info');
 
+    // Retry 1 lần khi gặp network error (do SDK mới + CDN cold start)
+    const withRetry = async (fn, label) => {
+      try { return await fn(); }
+      catch (e) {
+        const isNet = (e?.message || '').match(/network|fetch|failed/i);
+        if (!isNet) throw e;
+        setAuthFeedback(`Kết nối chậm, đang thử lại (${label})…`, 'info');
+        await new Promise((r) => setTimeout(r, 800));
+        return await fn();
+      }
+    };
+
     try {
       if (state.authMode === 'signup') {
         // Bước 1: tạo tài khoản
-        const { data, error } = await supabase.auth.signUp({ email, password });
+        const { data, error } = await withRetry(
+          () => supabase.auth.signUp({ email, password }),
+          'đăng ký'
+        );
         if (error) throw error;
 
         if (data?.session) {
@@ -506,7 +521,10 @@
         // Hoạt động khi admin đã tắt "Confirm email" trên Supabase
         try {
           const { data: signInData, error: signInError } =
-            await supabase.auth.signInWithPassword({ email, password });
+            await withRetry(
+              () => supabase.auth.signInWithPassword({ email, password }),
+              'đăng nhập'
+            );
           if (!signInError && signInData?.session) {
             applySession(signInData.session);
             closeAuth();
@@ -528,7 +546,10 @@
           'success'
         );
       } else {
-        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+        const { data, error } = await withRetry(
+          () => supabase.auth.signInWithPassword({ email, password }),
+          'đăng nhập'
+        );
         if (error) throw error;
         applySession(data.session);
         closeAuth();
