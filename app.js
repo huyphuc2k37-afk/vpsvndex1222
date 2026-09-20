@@ -469,6 +469,10 @@
     if (msg.includes('email not confirmed')) return 'Vui lòng xác nhận email trước khi đăng nhập.';
     if (msg.includes('password should be')) return 'Mật khẩu phải có ít nhất 8 ký tự.';
     if (msg.includes('rate limit')) return 'Thao tác quá nhanh, vui lòng thử lại sau ít phút.';
+    if (msg.includes('err_name_not_resolved') || msg.includes('failed to fetch') || msg.includes('networkerror'))
+      return 'Không kết nối được tới máy chủ xác thực. Vui lòng kiểm tra mạng hoặc liên hệ support@vpsvndex.com.';
+    if (msg.includes('500') || msg.includes('internal server error'))
+      return 'Máy chủ Supabase đang bị tạm dừng (project inactive). Vui lòng liên hệ admin để khôi phục.';
     if (msg.includes('network') || msg.includes('fetch')) return 'Mất kết nối mạng, vui lòng thử lại.';
     return err?.message || 'Đã có lỗi xảy ra, vui lòng thử lại.';
   }
