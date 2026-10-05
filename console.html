@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Console · VPSVNDEX</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="console.css" />
+</head>
+<body class="console-body">
+  <main class="console-shell">
+    <header class="console-topbar"><a class="brand" href="/"><span class="brand-mark"><i></i><i></i><i></i></span><span>VPS<span>VNDEX</span></span></a><div class="console-status"><i></i><span id="console-host">Đang kết nối</span></div></header>
+    <section class="console-card">
+      <div id="terminal" class="console-terminal" role="log" aria-live="polite"></div>
+      <form id="command-form" class="console-command"><span id="prompt">root@vps:~#</span><input id="command-input" autocomplete="off" spellcheck="false" autofocus /></form>
+    </section>
+  </main>
+  <script src="supabase.min.js"></script>
+  <script src="supabase-config.js"></script>
+  <script src="console.js"></script>
+</body>
+</html>

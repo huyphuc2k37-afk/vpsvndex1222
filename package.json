@@ -1,0 +1,7 @@
+{
+  "name": "vpsvndex-api",
+  "private": true,
+  "type": "module",
+  "scripts": { "start": "node api.js" },
+  "engines": { "node": ">=20" }
+}

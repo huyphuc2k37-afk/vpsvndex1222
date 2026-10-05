@@ -105,6 +105,8 @@
       const cfg = window.SUPABASE_CONFIG || {};
       const url = cfg.url;
       const anonKey = cfg.anonKey;
+      const options = cfg.options || {};
+      
       const hasCreds = url && anonKey && !String(url).includes('YOUR-PROJECT-ID');
       if (typeof window.supabase === 'undefined') {
         console.warn('[VPSVNDEX] Supabase JS chưa load — auth bị tắt.');
@@ -114,7 +116,23 @@
         console.warn('[VPSVNDEX] supabase-config.js thiếu URL/anon key — auth bị tắt.');
         return null;
       }
-      return window.supabase.createClient(url, anonKey);
+      
+      // Merge default options với custom options từ config
+      const defaultOptions = {
+        auth: {
+          autoRefreshToken: true,
+          persistSession: true,
+          detectSessionInUrl: true,
+        },
+      };
+      
+      const mergedOptions = {
+        ...defaultOptions,
+        ...options,
+        auth: { ...defaultOptions.auth, ...(options.auth || {}) },
+      };
+      
+      return window.supabase.createClient(url, anonKey, mergedOptions);
     } catch (err) {
       console.warn('[VPSVNDEX] Khởi tạo Supabase thất bại:', err?.message || err);
       return null;
@@ -295,7 +313,7 @@
     // VPS list (chỉ provisioned)
     const vpsList = $('#dashboard-vps-list');
     if (vpsList) {
-      const vps = (state.orders || []).filter((o) => o.status === 'provisioned' && o.vps_ip);
+      const vps = (state.orders || []).filter((o) => o.status === 'provisioned' && o.instance_id);
       if (vps.length === 0) {
         vpsList.innerHTML = '<div class="dashboard-empty">Bạn chưa có VPS nào được cấp. Sau khi admin xác nhận thanh toán, VPS sẽ xuất hiện tại đây.</div>';
       } else {
@@ -326,22 +344,14 @@
       cancelled: 'Đã hủy',
     }[o.status] || o.status;
 
-    const credsBlock = (o.status === 'provisioned' && o.vps_ip && o.vps_password) ? `
+    const credsBlock = (o.status === 'provisioned' && o.instance_id) ? `
       <div class="dashboard-creds">
-        <p class="dashboard-creds-title">🔑 Thông tin VPS của bạn</p>
-        <div class="dashboard-creds-row">
-          <span>Username</span><b>${esc(o.vps_username || 'root')}</b>
-          <button class="copy-btn" type="button" data-copy="${esc(o.vps_username || 'root')}">Sao chép</button>
-        </div>
-        <div class="dashboard-creds-row">
-          <span>Địa chỉ IP</span><b>${esc(o.vps_ip)}</b>
-          <button class="copy-btn" type="button" data-copy="${esc(o.vps_ip)}">Sao chép</button>
-        </div>
-        <div class="dashboard-creds-row">
-          <span>Mật khẩu</span><b>${esc(o.vps_password)}</b>
-          <button class="copy-btn" type="button" data-copy="${esc(o.vps_password)}">Sao chép</button>
-        </div>
-        ${o.admin_notes ? `<div class="dashboard-creds-row"><span>Ghi chú admin</span><em>${esc(o.admin_notes)}</em></div>` : ''}
+        <p class="dashboard-creds-title">Thông tin simulator VPS</p>
+        <div class="dashboard-creds-row"><span>Hostname</span><b>${esc(o.hostname)}</b></div>
+        <div class="dashboard-creds-row"><span>Username</span><b>${esc(o.username || 'root')}</b></div>
+        <div class="dashboard-creds-row"><span>OS</span><b>Ubuntu 24.04 LTS</b></div>
+        <div class="dashboard-creds-row"><span>Terminal</span><a class="copy-btn" href="/console?instance=${encodeURIComponent(o.instance_id)}" target="_blank" rel="noopener">Mở console</a></div>
+        ${o.admin_notes ? `<div class="dashboard-creds-row"><span>Ghi chú</span><em>${esc(o.admin_notes)}</em></div>` : ''}
       </div>` : '';
 
     return `
@@ -466,7 +476,7 @@
     const msg = (err?.message || '').toLowerCase();
     if (msg.includes('invalid login credentials')) return 'Email hoặc mật khẩu không đúng.';
     if (msg.includes('user already registered')) return 'Email này đã được đăng ký.';
-    if (msg.includes('email not confirmed')) return 'Vui lòng xác nhận email trước khi đăng nhập.';
+    if (msg.includes('email not confirmed')) return 'Vui lòng tắt "Confirm email" trong Supabase Dashboard → Auth → Providers → Email, hoặc kiểm tra email xác nhận.';
     if (msg.includes('password should be')) return 'Mật khẩu phải có ít nhất 8 ký tự.';
     if (msg.includes('rate limit')) return 'Thao tác quá nhanh, vui lòng thử lại sau ít phút.';
     if (msg.includes('err_name_not_resolved') || msg.includes('failed to fetch') || msg.includes('networkerror'))
@@ -630,6 +640,21 @@
     const plan = PACKAGES.find((p) => p.id === state.pendingOrderPackageId);
     if (!plan) return;
 
+    // Check rate limit từ feature flags
+    const features = window.VPSVNDEX_FEATURES || {};
+    if (features.showRateLimitWarning) {
+      const recentOrders = state.orders.filter((o) => 
+        o.status === 'pending' && 
+        new Date(o.created_at) > new Date(Date.now() - 24 * 60 * 60 * 1000)
+      );
+      
+      const maxPending = features.maxPendingOrdersPerDay || 5;
+      if (recentOrders.length >= maxPending) {
+        showToast(`Bạn đã tạo ${maxPending} đơn chờ xác nhận trong 24h. Vui lòng liên hệ support.`);
+        return;
+      }
+    }
+
     const submit = $('#order-submit');
     submit.disabled = true;
     const originalText = submit.textContent;
@@ -639,24 +664,35 @@
       const customerEmail = state.user.email || '';
 
       const payload = {
-        user_id: state.user.id,                 // optional — đã thêm bằng migration
-        user_email: customerEmail,              // bắt buộc theo schema gốc
+        user_id: state.user.id,
+        user_email: customerEmail,
         package_id: plan.id,
         package_name: plan.name,
         region: state.activeRegion,
-        cycle: '1m',                            // mặc định 1 tháng
+        cycle: '1m',
         amount_vnd: plan.price,
         status: 'pending',
       };
+      
       const { error } = await supabase.from('orders').insert(payload);
-      if (error) throw error;
+      if (error) {
+        // Handle rate limit error từ database trigger
+        if (error.message && error.message.includes('quá nhiều đơn')) {
+          showToast(error.message);
+        } else {
+          throw error;
+        }
+        return;
+      }
 
-      showToast('Đã ghi nhận đơn. Admin sẽ xác nhận và gửi thông tin VPS qua email trong 1–24h.');
+      showToast('✓ Đã ghi nhận đơn. Admin sẽ xác nhận và gửi thông tin VPS qua email trong 1–24h.');
       await loadMyOrders();
-      // KHÔNG reset form (không còn field), KHÔNG đóng modal để user xem lại QR
+      
+      // Không đóng modal để user có thể xem lại QR và thông tin chuyển khoản
     } catch (err) {
       console.error('[createOrder]', err);
-      showToast('Không thể tạo đơn: ' + (err?.message || 'lỗi không xác định'));
+      const msg = err?.message || 'lỗi không xác định';
+      showToast('Không thể tạo đơn: ' + msg);
     } finally {
       submit.disabled = false;
       submit.textContent = originalText;
@@ -839,12 +875,75 @@
    * 9. BOOT
    * =========================================================== */
   function init() {
-    try { $('#year').textContent = new Date().getFullYear(); } catch (_) {}
+    // Check maintenance mode
+    const features = window.VPSVNDEX_FEATURES || {};
+    if (features.maintenanceMode) {
+      document.body.innerHTML = `
+        <div style="display:flex;align-items:center;justify-content:center;min-height:100vh;background:#0f172a;color:white;font-family:system-ui;text-align:center;padding:20px;">
+          <div>
+            <h1 style="font-size:32px;margin:0 0 16px;color:#4eb9ff;">🔧 Đang bảo trì</h1>
+            <p style="font-size:16px;color:#94a4b8;max-width:400px;">${features.maintenanceMessage || 'Hệ thống đang bảo trì, vui lòng quay lại sau.'}</p>
+          </div>
+        </div>`;
+      return;
+    }
+
+    try { $('#year').textContent = new Date().getFullYear(); } catch (_) 
+    
     supabase = initSupabase();
     renderPlans();
     renderHeader();
     wireEvents();
     bootstrapAuth();
+    
+    // Initialize analytics nếu có config
+    const analytics = window.VPSVNDEX_ANALYTICS || {};
+    
+    // Google Analytics
+    if (analytics.gaId) {
+      const script = document.createElement('script');
+      script.async = true;
+      script.src = `https://www.googletagmanager.com/gtag/js?id=${analytics.gaId}`;
+      document.head.appendChild(script);
+      
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', analytics.gaId);
+    }
+    
+    // Sentry error tracking
+    if (analytics.sentryDsn && typeof Sentry !== 'undefined') {
+      Sentry.init({
+        dsn: analytics.sentryDsn,
+        environment: 'production',
+        beforeSend(event) {
+          // Filter out common non-critical errors
+          if (event.message && event.message.includes('ResizeObserver')) return null;
+          return event;
+        },
+      });
+    }
+    
+    // Performance monitoring
+    if ('performance' in window && 'measure' in window.performance) {
+      window.addEventListener('load', () => {
+        setTimeout(() => {
+          const perfData = performance.getEntriesByType('navigation')[0];
+          if (perfData) {
+            console.log('[Performance]', {
+              DNS: Math.round(perfData.domainLookupEnd - perfData.domainLookupStart),
+              TCP: Math.round(perfData.connectEnd - perfData.connectStart),
+              Request: Math.round(perfData.responseStart - perfData.requestStart),
+              Response: Math.round(perfData.responseEnd - perfData.responseStart),
+              DOM: Math.round(perfData.domContentLoadedEventEnd - perfData.domContentLoadedEventStart),
+              Load: Math.round(perfData.loadEventEnd - perfData.loadEventStart),
+              Total: Math.round(perfData.loadEventEnd - perfData.fetchStart),
+            });
+          }
+        }, 0);
+      });
+    }
   }
 
   if (document.readyState === 'loading') {

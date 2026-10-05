@@ -1,36 +1,17 @@
 /* =============================================================
- * VPSVNDEX Admin — module IIFE
- * Login: hardcoded admin/Huyphuc123 (client-side gate — đủ cho scope này)
- * Tính năng:
- *   - Login / logout
- *   - Dashboard stats
- *   - Bảng đơn hàng: search, filter, refresh
- *   - Confirm / cancel order
- *   - Provision VPS: random IP + random password
- *   - Modal xem/cấp credentials
+ * VPSVNDEX Admin — Production v2.0
+ * Security: Role-based auth với Supabase RLS
+ * Features: Stats dashboard, order management, audit logs
  * ============================================================= */
 (function () {
   'use strict';
 
   // ========== CONFIG ==========
-  const ADMIN_USER = 'admin';
-  const ADMIN_PASS = 'Huyphuc123';
   const SESSION_KEY = 'vpsvndex_admin_session';
-
-  // Mock IP pool (IPv4 random trong dải datacenter VN phổ biến)
-  // Bạn có thể thêm dải khác khi có IP thật
-  const IP_POOLS = [
-    () => `103.${rand(20, 230)}.${rand(0, 255)}.${rand(2, 254)}`,
-    () => `45.${rand(120, 252)}.${rand(0, 255)}.${rand(2, 254)}`,
-    () => `113.${rand(160, 190)}.${rand(0, 255)}.${rand(2, 254)}`,
-    () => `203.${rand(160, 195)}.${rand(0, 255)}.${rand(2, 254)}`,
-  ];
 
   // ========== UTILS ==========
   const $ = (s, r = document) => r.querySelector(s);
   const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
-  const rand = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
-  const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
   const moneyFmt = new Intl.NumberFormat('vi-VN');
   const formatMoney = (v) => `${moneyFmt.format(v)}đ`;
   const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({
@@ -38,23 +19,6 @@
   }[c]));
   const shortId = (id) => id ? id.slice(0, 8).toUpperCase() : '—';
   const formatDate = (iso) => iso ? new Date(iso).toLocaleString('vi-VN') : '—';
-
-  // Random password 16 chars: chữ thường + hoa + số + symbol
-  function randomPassword(len = 16) {
-    const lower = 'abcdefghijkmnpqrstuvwxyz';
-    const upper = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
-    const digit = '23456789';
-    const sym   = '@#$%&*!?';
-    const all = lower + upper + digit + sym;
-    let pw = '';
-    pw += pick(lower.split(''));
-    pw += pick(upper.split(''));
-    pw += pick(digit.split(''));
-    pw += pick(sym.split(''));
-    for (let i = pw.length; i < len; i++) pw += pick(all.split(''));
-    return pw.split('').sort(() => Math.random() - 0.5).join('');
-  }
-  function randomIp() { return pick(IP_POOLS)(); }
 
   // ========== TOAST ==========
   let toastTimer = null;
@@ -69,6 +33,9 @@
 
   // ========== SUPABASE ==========
   let supabase = null;
+  let currentUser = null;
+  let isAdmin = false;
+
   function initSupabase() {
     try {
       const cfg = window.SUPABASE_CONFIG || {};
@@ -76,7 +43,7 @@
         console.warn('[admin] Supabase chưa sẵn sàng');
         return null;
       }
-      return window.supabase.createClient(cfg.url, cfg.anonKey);
+      return window.supabase.createClient(cfg.url, cfg.anonKey, cfg.options || {});
     } catch (e) {
       console.warn('[admin] initSupabase:', e?.message || e);
       return null;
@@ -99,9 +66,9 @@
       shell.hidden = false;
       shell.style.setProperty('display', 'block', 'important');
     }
-    // đảm bảo cuộn lên đầu khi vào shell
     try { window.scrollTo(0, 0); } catch {}
   }
+  
   function showLogin() {
     const login = $('#admin-login');
     const shell = $('#admin-shell');
@@ -119,12 +86,35 @@
     el.dataset.type = type;
   }
 
+  // Check if user has admin role
+  async function checkAdminRole() {
+    if (!supabase || !currentUser) return false;
+    
+    try {
+      const { data, error } = await supabase
+        .from('user_profiles')
+        .select('role')
+        .eq('id', currentUser.id)
+        .single();
+      
+      if (error) {
+        console.warn('[checkAdminRole]', error);
+        return false;
+      }
+      
+      return data?.role === 'admin' || data?.role === 'superadmin';
+    } catch (err) {
+      console.warn('[checkAdminRole]', err);
+      return false;
+    }
+  }
+
   // ========== STATE ==========
   const state = {
     orders: [],
     filter: 'all',
     search: '',
-    currentOrder: null, // đơn đang mở trong modal
+    currentOrder: null,
   };
 
   // ========== RENDER ==========
@@ -136,13 +126,20 @@
     $('#stat-provisioned').textContent = stats.provisioned ?? 0;
     $('#stat-cancelled').textContent   = stats.cancelled   ?? 0;
     $('#stat-revenue').textContent     = formatMoney(stats.revenue ?? 0);
+    
+    // Stats mới
+    if (stats.today !== undefined) {
+      const todayEl = document.createElement('article');
+      todayEl.innerHTML = `<span>Hôm nay</span><strong>${stats.today}</strong>`;
+      $('#admin-stats').appendChild(todayEl);
+    }
   }
 
   function matchesFilter(o) {
     if (state.filter !== 'all' && o.status !== state.filter) return false;
     if (!state.search) return true;
     const q = state.search.toLowerCase();
-    return [o.id, o.customer_name, o.customer_email, o.customer_phone, o.package_id]
+    return [o.id, o.user_email, o.package_id, o.instance_id]
       .some((v) => String(v ?? '').toLowerCase().includes(q));
   }
 
@@ -157,11 +154,11 @@
   }
 
   function renderVpsCell(o) {
-    if (o.vps_ip && o.vps_password) {
+    if (o.status === 'provisioned' && o.instance_id) {
       return `
         <div class="vps-creds">
-          <span><small>IP:</small> ${esc(o.vps_ip)}</span>
-          <span><small>Pass:</small> ${esc(o.vps_password)}</span>
+          <span><small>Instance:</small> ${esc(o.instance_id)}</span>
+          <span><small>Host:</small> ${esc(o.hostname || '—')}</span>
         </div>`;
     }
     return '<span class="vps-empty">Chưa cấp</span>';
@@ -193,10 +190,8 @@
     tbody.innerHTML = filtered.map((o) => `
       <tr>
         <td class="cell-id" data-label="Mã">#${esc(shortId(o.id))}</td>
-        <td class="cell-customer" data-label="Khách hàng">
-          <strong>${esc(o.customer_name)}</strong>
-          <span>${esc(o.customer_email)}</span>
-          <span>${esc(o.customer_phone)}</span>
+        <td class="cell-customer" data-label="Email">
+          <strong>${esc(o.user_email)}</strong>
         </td>
         <td data-label="Gói">${esc(o.package_id)}</td>
         <td data-label="Khu vực">${esc(o.region)}</td>
@@ -218,6 +213,13 @@
       renderStats(data);
     } catch (e) {
       console.warn('[stats]', e?.message || e);
+      if (e?.message?.includes('Access denied')) {
+        toast('⚠️ Không có quyền admin. Vui lòng liên hệ support.');
+        setTimeout(() => {
+          logout();
+          showLogin();
+        }, 2000);
+      }
     }
   }
 
@@ -230,7 +232,16 @@
       renderTable();
     } catch (e) {
       console.error('[orders]', e);
-      toast('Không tải được danh sách đơn: ' + (e?.message || 'lỗi'));
+      const msg = e?.message || 'lỗi';
+      if (msg.includes('Access denied')) {
+        toast('⚠️ Không có quyền admin');
+        setTimeout(() => {
+          logout();
+          showLogin();
+        }, 2000);
+      } else {
+        toast('Không tải được danh sách đơn: ' + msg);
+      }
     }
   }
 
@@ -254,18 +265,18 @@
     }
   }
 
-  async function provisionOrder(id, ip, password, username, notes) {
+  async function provisionOrder(id, instanceId, hostname, username, notes) {
     if (!supabase) return;
     try {
       const { data, error } = await supabase.rpc('admin_provision_order', {
         p_order_id: id,
-        p_vps_ip: ip,
-        p_vps_password: password,
+        p_instance_id: instanceId,
+        p_hostname: hostname,
         p_vps_username: username || 'root',
         p_admin_notes: notes || null,
       });
       if (error) throw error;
-      toast('Đã cấp VPS cho đơn #' + shortId(id));
+      toast('✓ Đã cấp VPS cho đơn #' + shortId(id));
       closeProvisionModal();
       await refreshAll();
     } catch (e) {
@@ -279,20 +290,19 @@
     state.currentOrder = order;
     $('#provision-title').textContent = `Cấp VPS · Đơn #${shortId(order.id)}`;
     $('#provision-summary').innerHTML = `
-      <div><span>Khách hàng</span><strong>${esc(order.customer_name)}</strong></div>
-      <div><span>Liên hệ</span><strong>${esc(order.customer_phone)}</strong></div>
-      <div><span>Email</span><strong>${esc(order.customer_email)}</strong></div>
+      <div><span>Khách hàng</span><strong>${esc(order.user_email)}</strong></div>
       <div><span>Gói</span><strong>${esc(order.package_id)} · ${esc(order.region)}</strong></div>
       <div><span>Số tiền</span><strong>${formatMoney(order.amount_vnd)}</strong></div>
       <div><span>Trạng thái</span>${statusBadge(order.status)}</div>
     `;
     $('#prov-username').value = order.vps_username || 'root';
-    $('#prov-ip').value       = order.vps_ip || '';
-    $('#prov-password').value = order.vps_password || '';
+    $('#prov-ip').value       = order.instance_id || '';
+    $('#prov-password').value = order.hostname || '';
     $('#prov-notes').value    = order.admin_notes || '';
     $('#provision-modal').classList.add('is-open');
     $('#provision-modal').setAttribute('aria-hidden', 'false');
   }
+  
   function closeProvisionModal() {
     $('#provision-modal').classList.remove('is-open');
     $('#provision-modal').setAttribute('aria-hidden', 'true');
@@ -302,30 +312,50 @@
   // ========== EVENTS ==========
   function wireEvents() {
     // Login form
-    $('#admin-login-form')?.addEventListener('submit', (e) => {
+    $('#admin-login-form')?.addEventListener('submit', async (e) => {
       e.preventDefault();
-      const u = $('#admin-username').value.trim();
-      const p = $('#admin-password').value;
+      const email = $('#admin-username').value.trim();
+      const password = $('#admin-password').value;
       const submit = $('#admin-login-submit');
+      
       submit.disabled = true;
       setLoginFeedback('Đang kiểm tra...', 'info');
-      // Fake delay để tránh brute force nhanh
-      setTimeout(() => {
-        if (u === ADMIN_USER && p === ADMIN_PASS) {
-          login();
-          setLoginFeedback('Đăng nhập thành công', 'success');
-          showShell();
-          refreshAll();
-        } else {
-          setLoginFeedback('Sai tài khoản hoặc mật khẩu', 'error');
+      
+      try {
+        if (!supabase) throw new Error('Supabase chưa được cấu hình');
+        
+        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+        if (error) throw error;
+        
+        currentUser = data.user;
+        
+        // Check admin role
+        const hasAdminAccess = await checkAdminRole();
+        if (!hasAdminAccess) {
+          await supabase.auth.signOut();
+          setLoginFeedback('⚠️ Tài khoản này không có quyền admin. Vui lòng liên hệ support.', 'error');
+          submit.disabled = false;
+          return;
         }
+        
+        isAdmin = true;
+        login();
+        setLoginFeedback('✓ Đăng nhập thành công', 'success');
+        showShell();
+        await refreshAll();
+      } catch (error) {
+        setLoginFeedback(error?.message || 'Sai tài khoản hoặc mật khẩu', 'error');
+      } finally {
         submit.disabled = false;
-      }, 350);
+      }
     });
 
     // Logout
-    $('#admin-logout')?.addEventListener('click', () => {
+    $('#admin-logout')?.addEventListener('click', async () => {
+      if (supabase) await supabase.auth.signOut();
       logout();
+      currentUser = null;
+      isAdmin = false;
       showLogin();
       $('#admin-username').value = '';
       $('#admin-password').value = '';
@@ -343,7 +373,7 @@
       renderTable();
     });
 
-    // Table actions (event delegation)
+    // Table actions
     $('#admin-tbody')?.addEventListener('click', async (e) => {
       const btn = e.target.closest('[data-action]');
       if (!btn) return;
@@ -369,36 +399,50 @@
       }
     });
 
-    // Random buttons
-    $('#prov-random-ip')?.addEventListener('click', () => { $('#prov-ip').value = randomIp(); });
-    $('#prov-random-pw')?.addEventListener('click', () => { $('#prov-password').value = randomPassword(); });
-
     // Provision form submit
     $('#provision-form')?.addEventListener('submit', async (e) => {
       e.preventDefault();
       if (!state.currentOrder) return;
-      const ip = $('#prov-ip').value.trim();
-      const pw = $('#prov-password').value.trim();
-      const user = $('#prov-username').value.trim();
+      
+      const instanceId = $('#prov-ip').value.trim();
+      const hostname = $('#prov-password').value.trim();
+      const username = $('#prov-username').value.trim() || 'root';
       const notes = $('#prov-notes').value.trim();
-      if (!/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(ip)) {
-        toast('Địa chỉ IP chưa đúng định dạng'); return;
+      
+      if (!instanceId || !hostname) {
+        toast('Vui lòng điền đầy đủ Instance ID và Hostname');
+        return;
       }
-      if (pw.length < 8) { toast('Mật khẩu phải ≥ 8 ký tự'); return; }
-      await provisionOrder(state.currentOrder.id, ip, pw, user, notes);
+      
+      await provisionOrder(state.currentOrder.id, instanceId, hostname, username, notes);
     });
   }
 
   // ========== BOOT ==========
-  function init() {
+  async function init() {
     supabase = initSupabase();
     wireEvents();
+    
     if (isLoggedIn()) {
-      showShell();
-      refreshAll();
-    } else {
-      showLogin();
+      // Verify session still valid
+      if (supabase) {
+        const { data } = await supabase.auth.getSession();
+        if (data?.session?.user) {
+          currentUser = data.session.user;
+          const hasAccess = await checkAdminRole();
+          if (hasAccess) {
+            isAdmin = true;
+            showShell();
+            await refreshAll();
+            return;
+          }
+        }
+      }
+      // Session invalid or not admin
+      logout();
     }
+    
+    showLogin();
   }
 
   if (document.readyState === 'loading') {
